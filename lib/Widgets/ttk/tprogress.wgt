@@ -1,0 +1,83 @@
+# Rozen. Rationalized with tile.
+
+Class       TProgressbar
+Lib     ttk
+TtkWidget       yes
+
+Icon        icon_progressbar.gif
+Icon       @vTcl::widgets::ttk::progressbar::getIcon
+DumpChildren    no
+#TreeLabel   ttk ProgressBar
+TreeLabel  @vTcl::widgets::ttk::progressbar::getWidgetTreeLabel
+CreateCmd   ttk::progressbar
+DefaultOptions  -maximum 100 ;#-foreground blue
+MegaWidget  yes
+Resizable   horizontal
+#InsertCmd       vTcl::widgets::bwidgets::progressbar::insertCmd
+InsertCmd    vTcl::widgets::ttk::progressbar::insertCmd
+IgnoreProc      ::ProgressBar::* ProgressBar
+
+# Will add the options that are required by this widget
+
+#NewOption -length "length" type
+NewOption -mode   "mode"   choice "determinate indeterminate"
+NewOption -maximum "maximum" type
+
+Function    "Set Variable..." vTcl::widgets::ttk::progressbar::setVariable
+Function        "Set Value..."    vTcl::widgets::ttk::progressbar::setValue
+
+## Special proc for setting up icons on the toolbar.
+proc vTcl:TProgressbar:ToolBarSetup {} {
+    vTcl:toolbar_add core TProgressbar "vertical progressbar" \
+        icon_progressbar_v.gif  "-orient vertical"
+    vTcl:toolbar_add core TProgressbar "horizontal progressbar" \
+        icon_progressbar_h.gif  "-orient horizontal"
+}
+
+namespace eval vTcl::widgets::ttk::progressbar {
+
+    proc resizeCmd {widget w h} {
+        # Not defined above therefore not used.
+        $widget configure -width [expr $w - 10]
+    }
+
+    proc insertCmd {target} {
+        $target configure -takefocus ""
+    }
+
+    proc getWidgetTreeLabel {target} {
+        set var [$target scalescalecget -variable]
+        if {$var != ""} {
+            return "Tprogressbar VAR=$var"
+        } else {
+            return "Tprogressbar"
+        }
+    }
+    proc setValue {} {
+        global vTcl
+        vTcl:core:set_option $vTcl(w,widget)\
+                         -value \
+                         "Value for $vTcl(w,widget)"
+    }
+
+    proc setVariable {} {
+        global vTcl
+        vTcl:core:set_option $vTcl(w,widget)\
+                         -variable \
+            "Set variable"
+    }
+    proc getIcon {{w ""}} {
+        if {[lempty $w]} {
+        return [list icon_scale_h.gif icon_scale_v.gif]
+    }
+        if {[catch {$w cget -orient} orient]} {
+            return "icon_progressbar.gif"
+        }
+        if {$orient == "horizontal"} {
+            return "icon_progressbar_h.gif"
+        }
+        return "icon_progressbar_v.gif"
+    }
+
+}
+

@@ -1,0 +1,344 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Styles and Themes &#8212; PAGE 8 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Using PAGE" href="use.html" />
+    <link rel="prev" title="Module Structure" href="modules.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="styles-and-themes">
+<span id="styles"></span><h1>Styles and Themes<a class="headerlink" href="#styles-and-themes" title="Permalink to this headline">¶</a></h1>
+<p>My understanding is that the motivation and attraction of ttk is that
+one may compose a GUI and it will look “normal” when run in any of the
+common OS’s - Linux, UNIX, Windows, or OS X.  Also, it is possible to
+create new themes which are more pleasing because of a more modern
+appearance of a GUI. However, I think ttk is a mess in terms of
+architecture, implementation, and especially documentation.  However,
+there are several much needed widgets available in ttk including
+ttk::notebook, ttk::progressbar, ttk::treeview, ttk::panedwindow,
+ttk::separator, and ttk::sizegrip. PAGE supports those ttk widgets as
+well as a few others. To get a better appreciation of some of the
+difficulties in working with styles and themes, see the <a class="reference external" href="https://tkdocs.com/tutorial/styles.html#whydifficult">difficulties
+page</a> for
+info.</p>
+<p>The Tk problem that PAGE addresses is that there are two sets of
+widgets, tk widgets and ttk widgets, but neither set is complete and
+so a GUI will probably combine widgets from each set.  For example,
+the set of tk widgets lack widgets such as tabbed notebooks, combo
+boxes, and separators while ttk widgets lack a message widget, text
+widgets, and canvas widgets.  In earlier versions of PAGE projects ttk
+widgets mimicked tk widgets. Version 8.0, introduces support of ttk
+themes and that requires that the appearance of tk widgets mimic ttk
+widgets.  Also, I try to have the generated GUI sport the PAGE
+preferences. And finally, I wish to respect PAGE preferences which
+allow one set of preferences for PAGE windows and different
+preferences for the GUI under development.</p>
+<p>In other words,I have tried to manipulate the Themes and Styles in a
+way that the PAGE user can mix ttk widgets with tk widgets and have a
+reasonably consistent appearance. This is very much a case of evolving
+understanding and appreciation. This usage of Themes and Styles is
+different from orthodox usage which would replace tk widgets with ttk
+widgets but it seems to work pretty well as shown by
+<a class="reference internal" href="examples.html#widgetdemo"><span class="std std-ref">Widgetdemo</span></a>. There are still issues related to menus which will
+be addressed in a future release.</p>
+<p>I received a great deal of help from Guilherme Polo which got me to
+the point I am at now. Also, Maksim Korzh was instrumental in
+providing the Style coding for the PNotebook widget.</p>
+<p>First I would like to automatically generate code for the user which
+would follow his color scheme as expressed in the preferences window.
+Consider the following code for a GUI window that contains a tabbed
+notebook with a background color of wheat:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">_style_code_ran</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">def</span> <span class="nf">_style_code</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">_style_code_ran</span>
+    <span class="k">if</span> <span class="n">_style_code_ran</span><span class="p">:</span> <span class="k">return</span>
+    <span class="k">try</span><span class="p">:</span> <span class="n">note_support</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s1">&#39;source&#39;</span><span class="p">,</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_location</span><span class="p">,</span> <span class="s1">&#39;themes&#39;</span><span class="p">,</span> <span class="s1">&#39;page-wheat.tcl&#39;</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span> <span class="k">pass</span>
+    <span class="n">style</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Style</span><span class="p">()</span>
+    <span class="n">style</span><span class="o">.</span><span class="n">theme_use</span><span class="p">(</span><span class="s1">&#39;page-wheat&#39;</span><span class="p">)</span>
+    <span class="n">style</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">font</span> <span class="o">=</span> <span class="s2">&quot;-family {DejaVu Sans} -size 14&quot;</span><span class="p">)</span>
+    <span class="n">_style_code_ran</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>The module level function _style_code sets up the theme to be
+used with the ttk widgets. This code will vary with the theme and the
+ttk widgets used. It is only executed once. It reads the specified
+theme, if it is not one of the ttk builtin themes and sets the font to
+the default text font specified in the preferences.</p>
+<p>The following code in the __init__ fixes the background color of the
+Toplevel window.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">top</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">background</span><span class="o">=</span><span class="n">_bgcolor</span><span class="p">)</span>
+<span class="n">top</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">highlightbackground</span><span class="o">=</span><span class="s2">&quot;wheat&quot;</span><span class="p">)</span>
+<span class="n">top</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">highlightcolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>I did all of my development work on Linux.  As an illustration of the
+same PAGE-generated GUI running under different systems, let me
+present the following screens shots of vrex.py (vrex is one of the
+examples discussed later in the examples section):</p>
+<img alt="_images/vrex-linux.png" src="_images/vrex-linux.png" />
+<p>Above: Running vrex running on Linux.  This is what I built using PAGE
+on Linux..</p>
+<img alt="_images/vrex-windows10.png" src="_images/vrex-windows10.png" />
+<p>Above: Running vrex running on Windows 10 using the “winnative”
+theme. This looks pretty good except for the background color in the
+menubar and the sizegrep.</p>
+<img alt="_images/vrex-osx.jpg" src="_images/vrex-osx.jpg" />
+<p>Above: Running vrex running on OS X.</p>
+<section id="version-8-additions">
+<span id="v8"></span><h2>Version 8 Additions<a class="headerlink" href="#version-8-additions" title="Permalink to this headline">¶</a></h2>
+<p>There are two sets of windows presented in PAGE - PAGE windows like
+the Attribute Editor and the Widget Tree and GUI windows being
+constructed. Themes are only active or imposed on the GUI windows
+while the appearance of PAGE windows follows the Preferences window.</p>
+<p>PAGE version 8 introduces the ability to use ttk themes other than the
+built in “default” theme. Previously, PAGE supported only the
+“default” theme and it was perverted to make the ttk widgets resemble
+the tk widgets. I had in mind that one would use tk widgets and still
+have consistent access to needed widgets that have no counterpart in
+tk widget set such as notebooks and progress bars.  Since Version 8
+makes available all of the builtin themes including “default” which
+should be left untouched, it seemed best to create a new theme, named
+“page-legacy”.  If one selects “page-legacy” as the theme in
+preferences and sticks with it, PAGE will behave as previously.</p>
+<p>In theory, if one wishes to exploit the appearance of another theme, he
+selects one of the other supported themes and confines himself to ttk
+widgets.</p>
+<p>Themes impose geometric features, color schemes, and fonts. Typically,
+the font size is 10 point. Since I strain to read 10 point fonts, I
+have attempted to respect the GUI font preferences. That is, GUI fonts
+specified in the PAGE Preferences Window will be imposed with ttk
+widgets.</p>
+<section id="default-is-not-default-unless-it-is">
+<h3>Default is not default Unless it is<a class="headerlink" href="#default-is-not-default-unless-it-is" title="Permalink to this headline">¶</a></h3>
+<p>Ttk has several builtin themes and the list of those available is
+dependent on the OS where Tk or tkinter is running. For example, on
+Linux the builtin themes are clam, alt, default, and classic. With
+Windows the list is winnative, clam, alt, default, classic, vista, and
+xpnative. Finally, OSX the builtin themes are aqua, clam, alt,
+default, and classic.  If the program does not specify the theme to be
+used, on Linux “default” is used, on Windows “vista”, and on OSX
+“aqua”. The Preferences window allows the user allows the user to
+specify the initial theme to be used; if unspecified, then “default”
+is the initial theme.</p>
+</section>
+<section id="third-party-themes">
+<h3>Third Party Themes<a class="headerlink" href="#third-party-themes" title="Permalink to this headline">¶</a></h3>
+<p>I distinguish two groups of themes: builtin themes and third-party
+themes. The builtin themes are those which are part of tcl/tk and are
+contained in the tcl code. Third party themes are user written. I was
+able to find no documentation, guidance, or even suggestions on
+creating themes. It’s bedlam out there! Third party themes available
+in PAGE are contained in the themes subdirectory of PAGE installation
+directory. Any third party themes used by the generated Python code
+must be in a themes subdirectory of his project directory.</p>
+<p>I have modified the “default” theme in order to support
+legacy projects and named the theme “page-legacy”. These are projects
+that were built with earlier versions of PAGE and work with PAGE
+version 7.6. If you open a legacy project PAGE will do what is
+necessary to have all widgets use the background and foreground colors
+and fonts specified at creation. And if you modify and save the
+project it will be saved as a legacy project. Thus, even if you wish
+to update a legacy project you are drawn into the world of Themes and
+Styles. And you will need to have a “themes” subdirectory in your
+project directory containing the “page-legacy” theme for execution of
+the generated code. The “page-legacy” is not suitable for use anywhere
+other than PAGE and PAGE generated Python GUI’s.</p>
+<p>PAGE supports some third party themes. We have looked at a number of
+third party themes and found most disappointing. We have created
+several themes which we will try to support. They are “notsodark”,
+“page-notsodark”, “page-dark”, “page-light”, “page-wheat”, and
+“page-legacy”. Also, several other third party themes are included but
+if problems are encountered with either a theme itself or changes
+needed by the way we access it, we will not touch it.</p>
+<p>Supported third party themes are stored in a new subdirectory, themes,
+of the PAGE installation directory. the themes direcctory contains;</p>
+<ul class="simple">
+<li><p>tcl theme files, eg. notsodark.tcl, which define a theme.</p></li>
+<li><p>theme support directories, eg. notsodark which contains support
+files, including a bunch of images. Not all themes require such a
+directory.</p></li>
+<li><p>themes.tcl, a file of my creation which causes the themes in this
+directory to be loaded and active.</p></li>
+</ul>
+<p>Of course, PAGE users can include other themes in the same way as the
+included themes.</p>
+<p>Remember that PAGE uses the themes directory in the install directory
+for creating the GUI and the Python modules, while execution of the
+generated modules relies on the themes directory of the project
+directory.</p>
+</section>
+<section id="legacy-projects-and-themes">
+<h3>Legacy Projects and Themes<a class="headerlink" href="#legacy-projects-and-themes" title="Permalink to this headline">¶</a></h3>
+<p>Legacy has multiple meanings in PAGE. One, legacy can refer to
+projects created prior to version 8.0.  Legacy can refer to PAGE
+functionality available before 8.0 specifically the ability to specify
+GUI color preferences. Also, there is the “page-legacy” theme which
+attempts to provide some of the legacy functionality.</p>
+<p>The project files in PAGE now include the project theme. When PAGE
+opens a project but does not contain theme information, it is assigned
+the “page-legacy” theme. This allows the user to bring legacy projects
+forward into version 8 and beyond. It also allows the user to use the
+borrow function from legacy projects.</p>
+<p>When borrowing from a legacy project, you might see some weird color
+combinations. If so try changing to a different theme and back.</p>
+<p>It is highly recommended that if you are in the legacy theme that you
+use only those ttk widgets that have are missing from the tk widget
+set. Similarly if you are in one of the other themes use only those tk
+themes that are lacking in the ttk set of themes.</p>
+</section>
+<section id="changing-themes">
+<h3>Changing Themes<a class="headerlink" href="#changing-themes" title="Permalink to this headline">¶</a></h3>
+<p>It is easy in PAGE to visualize and switch themes. The easiest way to
+change themes is by selecting a new theme from the Combobox in the
+main PAGE window. Just select the new theme and the GUI will change to
+that theme.</p>
+<p>One can also use the Theme Chooser from the Button-3 context menu,
+from the Main Menu -&gt; Theme Chooser, or by the Control-T shortcut. The
+Theme Chooser shows the appearance of most ttk widgets in the current
+theme.</p>
+<p>In addition, the Preference window allows you to specify a preferred
+theme as the theme when PAGE starts.</p>
+<p>When a project is saved, the current theme is saved in the .tcl
+file. If the theme is then opened, not as a lender, its theme becomes
+the current theme.</p>
+</section>
+<section id="toolbutton-style">
+<h3>Toolbutton Style<a class="headerlink" href="#toolbutton-style" title="Permalink to this headline">¶</a></h3>
+<p>Ttk::button widgets support the Toolbutton style in all standard
+themes, which is useful for creating widgets for toolbars.  To use it,
+select and place a ttk::button and specify “Toolbutton” as the style
+in the Attribute Editor.</p>
+<p>This style is available in a consistent implementation for all the
+builtin themes. However, this style is implemented in a hit or miss
+fashion for third party themes. I think that for both page-notsodark
+and page-wheat themes the Toolbutton style is correctly implemented.</p>
+<p>One can change the menubar colors and fonts in Linux but not
+in Windows or OS X. The reason is that the menubar is drawn using
+native widgets that aren’t managed by tk or tkinter, so you’re limited
+to what the platform allows. <a class="reference external" href="https://stackoverflow.com/questions/49088785/changing-the-colour-of-tkinter-menubar">For more information</a>. Specifying
+menu colors via the color preferences in Windows the menubar will be
+the Windows colors and font, but the sub element will carry the
+specified preferences including the preferred font.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PAGE</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interface.html">The PAGE Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="preferences.html">Defaults and Preferences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Module Structure</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Styles and Themes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-8-additions">Version 8 Additions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#default-is-not-default-unless-it-is">Default is not default Unless it is</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#third-party-themes">Third Party Themes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#legacy-projects-and-themes">Legacy Projects and Themes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#changing-themes">Changing Themes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#toolbutton-style">Toolbutton Style</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="use.html">Using PAGE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use.html#saving-of-page-files">Saving of PAGE Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="menu.html">Menus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rework.html">Rework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rework.html#reuse">Reuse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ttkwidget.html">Ttkwidgets Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="final.html">Epilogue</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="modules.html" title="previous chapter">Module Structure</a></li>
+      <li>Next: <a href="use.html" title="next chapter">Using PAGE</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2008 - 2023 Donald Rozenberg.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/themes.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
