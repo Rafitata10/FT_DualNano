@@ -15,6 +15,7 @@ import tkinter.ttk as ttk
 from tkinter.constants import *
 import os.path
 import serial
+import time
 
 _location = os.path.dirname(__file__)
 
@@ -35,7 +36,37 @@ _tabbg2 = 'gray40'
 text_color_A = None
 text_color_B = None
 
+# Función para inicializar la comunicación serie con un puerto específico.
+def initialize_serial(self):
+    # Inicializar la comunicación serie.
+    self.serial_ports = []
+    for port in PORTS:
+        try:
+            ser = serial.Serial(port, BAUDRATE)
+            self.serial_ports.append(ser)
+        except serial.SerialException:
+            print(f"No se puede abrir el puerto {port}")
+
+# Función para cerrar la conexión serie del puerto USB2 y abrir una nueva conexión después de 2 segundos.
+def initialize_and_continue(self):
+    # Buscar y cerrar la conexión serie del puerto USB2 si está abierta.
+    for ser in self.serial_ports:
+        if ser.port == '/dev/ttyUSB2' and ser.is_open:
+            ser.close()
+            self.serial_ports.remove(ser)  # Eliminar el puerto de la lista.
+    # Esperar 2 segundos antes de intentar nuevamente la conexión.
+    time.sleep(2)
+    # Intentar abrir una nueva conexión solo con el puerto USB2.
+    try:
+        ser = serial.Serial('/dev/ttyUSB2', BAUDRATE)
+        self.serial_ports.append(ser)  # Agregar el nuevo puerto a la lista.
+    except serial.SerialException:
+        print(f"No se puede abrir el puerto /dev/ttyUSB2")
+    # Continuar leyendo datos después de 2 segundos.
+    self.read_serial_data()
+
 class FT_DualNano:
+
     def __init__(self, top=None):
         '''This class configures and populates the toplevel window.
            top is the toplevel containing window.'''
@@ -54,28 +85,28 @@ class FT_DualNano:
 
         self.Comparator = tk.LabelFrame(self.top)
         self.Comparator.place(relx=0.412, rely=0.06, relheight=0.103
-                , relwidth=0.138)
+                , relwidth=0.135)
         self.Comparator.configure(borderwidth="0")
         self.Comparator.configure(font="-family {DejaVu Sans} -size 10")
         self.Comparator.configure(background="#ffffff")
 
         self.B_Controller = tk.Label(self.top)
-        self.B_Controller.place(relx=0.742, rely=0.025, height=28, width=103)
+        self.B_Controller.place(relx=0.742, rely=0.025, height=28, width=136)
         self.B_Controller.configure(activebackground="#d9d9d9")
         self.B_Controller.configure(anchor='w')
         self.B_Controller.configure(background="#7a7a7a")
         self.B_Controller.configure(compound='left')
         self.B_Controller.configure(font="-family {Umpush} -size 13 -weight bold")
-        self.B_Controller.configure(text='''B_Controller''')
+        self.B_Controller.configure(text='  B_Controller')
 
         self.A_Controller = tk.Label(self.top)
-        self.A_Controller.place(relx=0.128, rely=0.025, height=28, width=106)
+        self.A_Controller.place(relx=0.128, rely=0.025, height=28, width=136)
         self.A_Controller.configure(activebackground="#d9d9d9")
         self.A_Controller.configure(anchor='w')
         self.A_Controller.configure(background="#7a7a7a")
         self.A_Controller.configure(compound='left')
         self.A_Controller.configure(font="-family {Umpush} -size 13 -weight bold")
-        self.A_Controller.configure(text='''A_Controller''')
+        self.A_Controller.configure(text='  A_Controller')
 
         self.BController = tk.LabelFrame(self.top)
         self.BController.place(relx=0.724, rely=0.06, relheight=0.103
@@ -91,7 +122,7 @@ class FT_DualNano:
         self.Green.configure(background="#05ad05")
         self.Green.configure(compound='left')
         self.Green.configure(font="-family {DejaVu Sans} -size 10")
-        self.Green.configure(text='''OK State''')
+        self.Green.configure(text='   OK State')
 
         self.Purple = tk.Label(self.top)
         self.Purple.place(relx=0.44, rely=0.49, height=50, width=91)
@@ -100,7 +131,7 @@ class FT_DualNano:
         self.Purple.configure(background="#884cd8")
         self.Purple.configure(compound='left')
         self.Purple.configure(font="-family {DejaVu Sans} -size 10")
-        self.Purple.configure(text='''Checking''')
+        self.Purple.configure(text='   Checking')
 
         self.Blue = tk.Label(self.top)
         self.Blue.place(relx=0.44, rely=0.407, height=49, width=91)
@@ -109,24 +140,25 @@ class FT_DualNano:
         self.Blue.configure(background="#1082c4")
         self.Blue.configure(compound='left')
         self.Blue.configure(font="-family {DejaVu Sans} -size 10")
-        self.Blue.configure(text='''Reseting''')
+        self.Blue.configure(text='   Reseting')
 
         self.Title = tk.Label(self.top)
-        self.Title.place(relx=0.376, rely=0.239, height=46, width=232)
+        self.Title.place(relx=0.390, rely=0.239, height=46, width=250)
         self.Title.configure(activebackground="#d9d9d9")
         self.Title.configure(anchor='w')
         self.Title.configure(background="#7a7a7a")
         self.Title.configure(compound='left')
         self.Title.configure(font="-family {DejaVu Sans} -size 12 -weight bold -underline 1")
-        self.Title.configure(text='''Possible System States:''')
+        self.Title.configure(text='Possible System States:')
 
         self.White = tk.Label(self.top)
         self.White.place(relx=0.44, rely=0.323, height=49, width=91)
-        self.White.configure(activebackground="#d9d9d9")
+        self.White.configure(activebackground="white")
+        self.White.configure(background="white")
         self.White.configure(anchor='w')
         self.White.configure(compound='left')
         self.White.configure(font="-family {DejaVu Sans} -size 10")
-        self.White.configure(text='''Waiting''')
+        self.White.configure(text='    Waiting')
 
         self.AController = tk.LabelFrame(self.top)
         self.AController.place(relx=0.11, rely=0.06, relheight=0.103
@@ -142,7 +174,7 @@ class FT_DualNano:
         self.Red.configure(background="#d8131a")
         self.Red.configure(compound='left')
         self.Red.configure(font="-family {DejaVu Sans} -size 10")
-        self.Red.configure(text='''ERROR''')
+        self.Red.configure(text='    ERROR')
 
         self.highFloater = tk.Label(self.top)
         self.highFloater.place(relx=0.009, rely=0.861, height=20, width=82)
@@ -311,13 +343,13 @@ class FT_DualNano:
         self.hFloater.configure(background="#d8131a")
 
         self._Comparator = tk.Label(self.top)
-        self._Comparator.place(relx=0.435, rely=0.037, height=16, width=101)
+        self._Comparator.place(relx=0.435, rely=0.030, height=16, width=131)
         self._Comparator.configure(activebackground="#d9d9d9")
         self._Comparator.configure(anchor='w')
         self._Comparator.configure(background="#7a7a7a")
         self._Comparator.configure(compound='left')
         self._Comparator.configure(font="-family {Umpush} -size 13 -weight bold")
-        self._Comparator.configure(text='''Comparator''')
+        self._Comparator.configure(text=' Comparator')
 
 
         # Inicializar las etiquetas de los controladores A y B.
@@ -334,13 +366,7 @@ class FT_DualNano:
         self.Text_B.tag_configure("iam", foreground="#05ad05")  # Color verde para "I am".
 
         # Inicializar la comunicación serie.
-        self.serial_ports = []
-        for port in PORTS:
-            try:
-                ser = serial.Serial(port, BAUDRATE)
-                self.serial_ports.append(ser)
-            except serial.SerialException:
-                print(f"No se puede abrir el puerto {port}")
+        initialize_serial(self)
 
         # Leer datos de los puertos serie y mostrarlos en las cajas de texto.
         self.top.after(100, self.read_serial_data)
@@ -385,20 +411,56 @@ class FT_DualNano:
                         controller_frame.configure(background="#05ad05")  # Color verde.
                         text_color_A = "black"  # Color negro para el textoA.
                         text_color_B = "black"  # Color negro para el texto_B.
-                    # elif "SRTank" not in data:
-                    #     text_color_A = "black"  # Color negro por defecto para el texto_A.
-                    #     text_color_B = "black"  # Color negro por defecto para el texto_B.
 
+                    # Default value if there is not any value.
                     if text_color_A is None:
                         text_color_A = "black"
                     elif text_color_A is None:
                         text_color_B = "black"
 
+                    def process_tank_message(data, text_box, text_color):
+                        # Procesar el mensaje y mostrar la información deseada.
+                        tank_info = data[len("SRTank:"):].strip().split(", ")
+                        volume = tank_info[5]  # Obtener el volumen del tanque.
+                        temperature = tank_info[6]  # Obtener la temperatura del tanque.
+                        tank_state_msg = f"SRTank state:\nVolume = {volume}l, Temperature = {temperature}ºC"
+
+                        # Insertar el mensaje en el text_box con el color correspondiente.
+                        text_box.insert(tk.END, tank_state_msg + "\n", text_color)
+
+                    def process_step_message(data, text_box, text_color):
+                        # Obtener el número de STEP del mensaje.
+                        step_number = int(data.split()[-1].strip("STEP"))
+                        # Determinar el mensaje correspondiente al número de STEP.
+                        step_messages = {
+                            0: "Filling",
+                            1: "Heating",
+                            2: "Filling",
+                            3: "Mixing",
+                            4: "Cooling",
+                            5: "Emptying"
+                        }
+                        # Construir el mensaje completo.
+                        step_message = f"{data.strip()} -> {step_messages.get(step_number, 'Unknown')}"
+
+                        # Insertar el mensaje en el text_box con el color correspondiente.
+                        text_box.insert(tk.END, step_message + "\n", text_color)
+
                     # Insertar el mensaje en el text_box con el color correspondiente.
                     if text_box == self.Text_A:
-                        text_box.insert(tk.END, data + "\n", text_color_A)
+                        if data.startswith("I am STEP"):
+                            process_step_message(data, text_box, text_color_A)
+                        elif data.startswith("SRTank:"):
+                            process_tank_message(data, text_box, text_color_A)
+                        else:
+                            text_box.insert(tk.END, data + "\n", text_color_A)
                     elif text_box == self.Text_B:
-                        text_box.insert(tk.END, data + "\n", text_color_B)
+                        if data.startswith("I am STEP"):
+                            process_step_message(data, text_box, text_color_B)
+                        elif data.startswith("SRTank:"):
+                            process_tank_message(data, text_box, text_color_B)
+                        else:
+                            text_box.insert(tk.END, data + "\n", text_color_B)
                     text_box.see(tk.END)  # Hacer scroll automáticamente al final del texto.
 
                     # Actualizar el color del controlador A y B.
@@ -421,8 +483,9 @@ class FT_DualNano:
                                     frame_1.configure(background="#d8131a")  # Color rojo.
 
             except UnicodeDecodeError as e:
-                # Nothing to do. Just ignore the error and try again.
-                pass
+                pass # Ignorar errores de decodificación Unicode y continuar con la lectura.
+            except Exception as e:
+                initialize_and_continue(self) # Serial Port Error, try to reconnect and continue reading.
 
         # Cambiar el color del LabelFrame "Comparator" según los estados de los controladores A y B.
         if controller_a_color == "#d8131a" or controller_b_color == "#d8131a":
@@ -434,7 +497,7 @@ class FT_DualNano:
             if self.Comparator.cget("background") != "#05ad05":
                 self.Comparator.configure(background="#05ad05")  # Color verde.
 
-        self.top.after(50, self.read_serial_data)  # Volver a leer después de 50 ms.
+        self.top.after(1, self.read_serial_data)  # Volver a leer después de 1 ms.
 
 def start_up():
     FT_DualNano_support.main()

@@ -15,6 +15,7 @@ import tkinter.ttk as ttk
 from tkinter.constants import *
 import os.path
 import serial
+import time
 
 _location = os.path.dirname(__file__)
 
@@ -35,7 +36,32 @@ _tabbg2 = 'gray40'
 text_color_A = None
 text_color_B = None
 
+# Función para inicializar la comunicación serie con un puerto específico.
+def initialize_serial(self):
+    # Inicializar la comunicación serie.
+    self.serial_ports = []
+    for port in PORTS:
+        try:
+            ser = serial.Serial(port, BAUDRATE)
+            self.serial_ports.append(ser)
+        except serial.SerialException:
+            print(f"No se puede abrir el puerto {port}")
+
+def initialize_and_continue(self):
+    # Cerrar las posibles conexiones serie abiertas si hubiera alguna.
+    if self.serial_ports is not None:
+        for ser in self.serial_ports:
+            if ser.is_open:
+                ser.close()
+    # Esperar 3 segundos antes de intentar nuevamente la conexión
+    time.sleep(3)
+    # Inicializar la comunicación serie nuevamente
+    initialize_serial(self)
+    # Continuar leyendo datos después de 3 segundos.
+    self.read_serial_data()
+
 class FT_DualNano:
+
     def __init__(self, top=None):
         '''This class configures and populates the toplevel window.
            top is the toplevel containing window.'''
@@ -122,7 +148,8 @@ class FT_DualNano:
 
         self.White = tk.Label(self.top)
         self.White.place(relx=0.44, rely=0.323, height=49, width=91)
-        self.White.configure(activebackground="#d9d9d9")
+        self.White.configure(activebackground="white")
+        self.White.configure(background="white")
         self.White.configure(anchor='w')
         self.White.configure(compound='left')
         self.White.configure(font="-family {DejaVu Sans} -size 10")
@@ -334,13 +361,7 @@ class FT_DualNano:
         self.Text_B.tag_configure("iam", foreground="#05ad05")  # Color verde para "I am".
 
         # Inicializar la comunicación serie.
-        self.serial_ports = []
-        for port in PORTS:
-            try:
-                ser = serial.Serial(port, BAUDRATE)
-                self.serial_ports.append(ser)
-            except serial.SerialException:
-                print(f"No se puede abrir el puerto {port}")
+        initialize_serial(self)
 
         # Leer datos de los puertos serie y mostrarlos en las cajas de texto.
         self.top.after(100, self.read_serial_data)
@@ -397,19 +418,41 @@ class FT_DualNano:
                         tank_info = data[len("SRTank:"):].strip().split(", ")
                         volume = tank_info[5]  # Obtener el volumen del tanque.
                         temperature = tank_info[6]  # Obtener la temperatura del tanque.
-                        tank_state_msg = f"SRTank state:\nVolume = {volume}l & Temperature = {temperature}ºC"
+                        tank_state_msg = f"SRTank state:\nVolume = {volume}l, Temperature = {temperature}ºC"
 
                         # Insertar el mensaje en el text_box con el color correspondiente.
                         text_box.insert(tk.END, tank_state_msg + "\n", text_color)
 
+                    def process_step_message(data, text_box, text_color):
+                        # Obtener el número de STEP del mensaje.
+                        step_number = int(data.split()[-1].strip("STEP"))
+                        # Determinar el mensaje correspondiente al número de STEP.
+                        step_messages = {
+                            0: "Filling",
+                            1: "Heating",
+                            2: "Filling",
+                            3: "Mixing",
+                            4: "Cooling",
+                            5: "Emptying"
+                        }
+                        # Construir el mensaje completo.
+                        step_message = f"{data.strip()} -> {step_messages.get(step_number, 'Unknown')}"
+
+                        # Insertar el mensaje en el text_box con el color correspondiente.
+                        text_box.insert(tk.END, step_message + "\n", text_color)
+
                     # Insertar el mensaje en el text_box con el color correspondiente.
                     if text_box == self.Text_A:
-                        if data.startswith("SRTank:"):
+                        if data.startswith("I am STEP"):
+                            process_step_message(data, text_box, text_color_A)
+                        elif data.startswith("SRTank:"):
                             process_tank_message(data, text_box, text_color_A)
                         else:
                             text_box.insert(tk.END, data + "\n", text_color_A)
                     elif text_box == self.Text_B:
-                        if data.startswith("SRTank:"):
+                        if data.startswith("I am STEP"):
+                            process_step_message(data, text_box, text_color_B)
+                        elif data.startswith("SRTank:"):
                             process_tank_message(data, text_box, text_color_B)
                         else:
                             text_box.insert(tk.END, data + "\n", text_color_B)
@@ -435,8 +478,11 @@ class FT_DualNano:
                                     frame_1.configure(background="#d8131a")  # Color rojo.
 
             except UnicodeDecodeError as e:
-                # Nothing to do. Just ignore the error and try again.
-                pass
+                print(f"Error de decodificación Unicode")
+                pass # Ignorar errores de decodificación Unicode y continuar con la lectura.
+            except Exception as e:
+                print(f"Serial Port Error")
+                initialize_and_continue(self)
 
         # Cambiar el color del LabelFrame "Comparator" según los estados de los controladores A y B.
         if controller_a_color == "#d8131a" or controller_b_color == "#d8131a":
