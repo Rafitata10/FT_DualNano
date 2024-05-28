@@ -47,22 +47,22 @@ def initialize_serial(self):
         except serial.SerialException:
             print(f"No se puede abrir el puerto {port}")
 
-# Función para cerrar la conexión serie del puerto USB2 y abrir una nueva conexión después de 2 segundos.
+# Función para cerrar la conexión serie del puerto USB2 y abrir una nueva conexión después de 3 segundos.
 def initialize_and_continue(self):
     # Buscar y cerrar la conexión serie del puerto USB2 si está abierta.
     for ser in self.serial_ports:
         if ser.port == '/dev/ttyUSB2' and ser.is_open:
             ser.close()
             self.serial_ports.remove(ser)  # Eliminar el puerto de la lista.
-    # Esperar 2 segundos antes de intentar nuevamente la conexión.
-    time.sleep(2)
+    # Esperar 3 segundos antes de intentar nuevamente la conexión.
+    time.sleep(3)
     # Intentar abrir una nueva conexión solo con el puerto USB2.
     try:
         ser = serial.Serial('/dev/ttyUSB2', BAUDRATE)
         self.serial_ports.append(ser)  # Agregar el nuevo puerto a la lista.
     except serial.SerialException:
         print(f"No se puede abrir el puerto /dev/ttyUSB2")
-    # Continuar leyendo datos después de 2 segundos.
+    # Continuar leyendo datos después de 3 segundos.
     self.read_serial_data()
 
 class FT_DualNano:
@@ -204,7 +204,7 @@ class FT_DualNano:
         self.highFloater_1.configure(text='''highFloater''')
 
         self.minTemp = tk.Label(self.top)
-        self.minTemp.place(relx=0.163, rely=0.861, height=20, width=69)
+        self.minTemp.place(relx=0.160, rely=0.861, height=20, width=69)
         self.minTemp.configure(activebackground="#d9d9d9")
         self.minTemp.configure(anchor='w')
         self.minTemp.configure(background="#7a7a7a")
@@ -213,7 +213,7 @@ class FT_DualNano:
         self.minTemp.configure(text='''minTemp''')
 
         self.lowFloater_1 = tk.Label(self.top)
-        self.lowFloater_1.place(relx=0.716, rely=0.861, height=20, width=79)
+        self.lowFloater_1.place(relx=0.715, rely=0.861, height=20, width=79)
         self.lowFloater_1.configure(activebackground="#d9d9d9")
         self.lowFloater_1.configure(anchor='w')
         self.lowFloater_1.configure(background="#7a7a7a")
@@ -222,7 +222,7 @@ class FT_DualNano:
         self.lowFloater_1.configure(text='''lowFloater''')
 
         self.minTemp_1 = tk.Label(self.top)
-        self.minTemp_1.place(relx=0.789, rely=0.861, height=20, width=70)
+        self.minTemp_1.place(relx=0.795, rely=0.861, height=20, width=70)
         self.minTemp_1.configure(activebackground="#d9d9d9")
         self.minTemp_1.configure(anchor='w')
         self.minTemp_1.configure(background="#7a7a7a")
@@ -249,7 +249,7 @@ class FT_DualNano:
         self.Text_B.configure(wrap="word")
 
         self.maxTemp = tk.Label(self.top)
-        self.maxTemp.place(relx=0.236, rely=0.861, height=20, width=70)
+        self.maxTemp.place(relx=0.230, rely=0.861, height=20, width=70)
         self.maxTemp.configure(activebackground="#d9d9d9")
         self.maxTemp.configure(anchor='w')
         self.maxTemp.configure(background="#7a7a7a")
@@ -267,7 +267,7 @@ class FT_DualNano:
         self.revolutions.configure(text='''revs''')
 
         self.maxTemp_1 = tk.Label(self.top)
-        self.maxTemp_1.place(relx=0.861, rely=0.861, height=20, width=69)
+        self.maxTemp_1.place(relx=0.8675, rely=0.861, height=20, width=69)
         self.maxTemp_1.configure(activebackground="#d9d9d9")
         self.maxTemp_1.configure(anchor='w')
         self.maxTemp_1.configure(background="#7a7a7a")
@@ -276,7 +276,7 @@ class FT_DualNano:
         self.maxTemp_1.configure(text='''maxTemp''')
 
         self.revolutions_1 = tk.Label(self.top)
-        self.revolutions_1.place(relx=0.939, rely=0.861, height=20, width=37)
+        self.revolutions_1.place(relx=0.940, rely=0.861, height=20, width=37)
         self.revolutions_1.configure(activebackground="#d9d9d9")
         self.revolutions_1.configure(anchor='w')
         self.revolutions_1.configure(background="#7a7a7a")
@@ -319,19 +319,19 @@ class FT_DualNano:
         self.lFloater_1.configure(background="#d8131a")
 
         self.minT_1 = tk.Frame(self.top)
-        self.minT_1.place(relx=0.798, rely=0.897, relheight=0.031
+        self.minT_1.place(relx=0.810, rely=0.897, relheight=0.031
                 , relwidth=0.024)
         self.minT_1.configure(relief="groove")
         self.minT_1.configure(background="#d8131a")
 
         self.maxT_1 = tk.Frame(self.top)
-        self.maxT_1.place(relx=0.87, rely=0.897, relheight=0.031, relwidth=0.024)
+        self.maxT_1.place(relx=0.880, rely=0.897, relheight=0.031, relwidth=0.024)
 
         self.maxT_1.configure(relief="groove")
         self.maxT_1.configure(background="#d8131a")
 
         self.revols_1 = tk.Frame(self.top)
-        self.revols_1.place(relx=0.934, rely=0.897, relheight=0.031
+        self.revols_1.place(relx=0.940, rely=0.897, relheight=0.031
                 , relwidth=0.024)
         self.revols_1.configure(relief="groove")
         self.revols_1.configure(background="#d8131a")
