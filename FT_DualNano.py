@@ -231,8 +231,7 @@ class FT_DualNano:
         self.minTemp_1.configure(text='''minTemp''')
 
         self.Text_A = tk.Text(self.top)
-        self.Text_A.place(relx=0.018, rely=0.191, relheight=0.661
-                , relwidth=0.317)
+        self.Text_A.place(relx=0.018, rely=0.191, relheight=0.661, relwidth=0.317)
         self.Text_A.configure(background="white")
         self.Text_A.configure(borderwidth="0")
         self.Text_A.configure(font="-family {DejaVu Sans} -size 10")
@@ -240,11 +239,10 @@ class FT_DualNano:
         self.Text_A.configure(wrap="word")
 
         self.Text_B = tk.Text(self.top)
-        self.Text_B.place(relx=0.642, rely=0.191, relheight=0.659
-                , relwidth=0.317)
+        self.Text_B.place(relx=0.642, rely=0.191, relheight=0.661, relwidth=0.317)
         self.Text_B.configure(background="white")
         self.Text_B.configure(borderwidth="0")
-        self.Text_B.configure(font="TkTextFont")
+        self.Text_B.configure(font="-family {DejaVu Sans} -size 10")
         self.Text_B.configure(selectbackground="#d9d9d9")
         self.Text_B.configure(wrap="word")
 
@@ -423,7 +421,7 @@ class FT_DualNano:
                         tank_info = data[len("SRTank:"):].strip().split(", ")
                         volume = tank_info[5]  # Obtener el volumen del tanque.
                         temperature = tank_info[6]  # Obtener la temperatura del tanque.
-                        tank_state_msg = f"SRTank state:\nVolume = {volume}l, Temperature = {temperature}ºC"
+                        tank_state_msg = f"SRTank state:\nVolume = {volume}l, Temperature = {temperature}°C"
 
                         # Insertar el mensaje en el text_box con el color correspondiente.
                         text_box.insert(tk.END, tank_state_msg + "\n", text_color)
